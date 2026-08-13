@@ -3,7 +3,7 @@ const MAX_PAGES = 40
 
 // Requests go through the Vite dev-server relay in vite.config.js, which
 // forwards them to the Shopify Admin API with the access token attached.
-async function adminFetch(path, creds, token) {
+export async function adminFetch(path, creds, token) {
   const res = await fetch(`/api/shopify${path}`, {
     headers: {
       'x-shop-domain': creds.shop.trim().replace(/^https?:\/\//, '').replace(/\/$/, ''),
@@ -22,7 +22,7 @@ async function adminFetch(path, creds, token) {
 }
 
 // Link: <https://…/products.json?page_info=abc&limit=250>; rel="next"
-function nextPageInfo(link) {
+export function nextPageInfo(link) {
   const match = /<([^>]+)>;\s*rel="next"/.exec(link || '')
   if (!match) return null
   try {

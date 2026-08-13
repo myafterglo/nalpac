@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import RawJsonModal from './RawJsonModal'
 
 // The response fields aren't documented, so show whatever scalar values the
 // record carries beyond the ones already displayed above.
@@ -6,37 +7,13 @@ function extraFields(item) {
   const shown = new Set(
     [item.sku, item.title, item.price, item.quantity, item.image].filter(Boolean).map(String),
   )
-  return Object.entries(item.raw)
+  const entries = Object.entries(item.raw)
     .filter(([, value]) => value !== null && value !== '' && typeof value !== 'object')
     .filter(([, value]) => !shown.has(String(value)))
-}
 
-function RawJsonModal({ item, onClose }) {
-  useEffect(() => {
-    // Capture phase plus stopPropagation so Escape closes this modal without
-    // also reaching the drawer's own Escape handler on window.
-    const onKey = (e) => {
-      if (e.key !== 'Escape') return
-      e.stopPropagation()
-      onClose()
-    }
-    window.addEventListener('keydown', onKey, true)
-    return () => window.removeEventListener('keydown', onKey, true)
-  }, [onClose])
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal-wide" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          <h2>{item.sku || 'Nalpac product'}</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-        <pre className="result-raw">{JSON.stringify(item.raw, null, 2)}</pre>
-      </div>
-    </div>
-  )
+  // Manufacturer stays in the list, just at the top of it.
+  const isManufacturer = ([, value]) => !!item.manufacturer && String(value) === item.manufacturer
+  return [...entries.filter(isManufacturer), ...entries.filter((e) => !isManufacturer(e))]
 }
 
 export default function NalpacResultCard({ item, onSelect }) {
@@ -74,7 +51,13 @@ export default function NalpacResultCard({ item, onSelect }) {
         </button>
       </div>
 
-      {showRaw && <RawJsonModal item={item} onClose={() => setShowRaw(false)} />}
+      {showRaw && (
+        <RawJsonModal
+          title={item.sku || 'Nalpac product'}
+          data={item.raw}
+          onClose={() => setShowRaw(false)}
+        />
+      )}
     </li>
   )
 }

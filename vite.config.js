@@ -93,8 +93,22 @@ function nalpacProxy() {
 
         // Everything after /api/nalpac is the Nalpac API path, e.g. /product?…
         try {
+          const writes = req.method !== 'GET' && req.method !== 'HEAD'
+          let body
+          if (writes) {
+            const chunks = []
+            for await (const chunk of req) chunks.push(chunk)
+            body = Buffer.concat(chunks)
+          }
+
           const upstream = await fetch(`https://api2.nalpac.com/api${req.url}`, {
-            headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' },
+            method: req.method,
+            headers: {
+              Authorization: `Basic ${auth}`,
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body,
           })
           const text = await upstream.text()
           res.statusCode = upstream.status

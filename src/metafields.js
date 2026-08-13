@@ -1,36 +1,11 @@
+import { BATCH_SIZE, graphql, productGid as gid } from './graphql'
+
 // The product metafield surfaced and edited on each card.
 export const METAFIELD_KEY = 'nalpac_sku'
 
 // Used when the store has no definition for the key — the metafield still gets
 // created, it just isn't backed by a definition.
 const FALLBACK_DEFINITION = { namespace: 'custom', key: METAFIELD_KEY, type: 'single_line_text_field' }
-
-// nodes(ids:) is billed per id, so keep each query well inside the cost limit.
-const BATCH_SIZE = 100
-
-async function graphql(creds, token, query, variables) {
-  const res = await fetch('/api/shopify/graphql.json', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-shop-domain': creds.shop.trim().replace(/^https?:\/\//, '').replace(/\/$/, ''),
-      'x-shop-token': token.access_token,
-    },
-    body: JSON.stringify({ query, variables }),
-  })
-
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    const error = new Error(body.errors || body.error || `HTTP ${res.status}`)
-    error.status = res.status
-    throw error
-  }
-  // GraphQL reports its own failures inside a 200 response.
-  if (body.errors?.length) throw new Error(body.errors.map((e) => e.message).join('; '))
-  return body.data
-}
-
-const gid = (productId) => `gid://shopify/Product/${productId}`
 
 /**
  * Looks the key up in the store's metafield definitions so the namespace and

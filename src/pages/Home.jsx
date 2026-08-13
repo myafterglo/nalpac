@@ -1,7 +1,7 @@
 export default function Home({ onNavigate }) {
   return (
     <article className="prose">
-      <h1>Shopify-Nacpac</h1>
+      <h1>Shopify-Nalpac</h1>
       <p>
         Browse a Shopify store's products and edit each product's <code>nalpac_sku</code>{' '}
         metafield in place.
@@ -27,7 +27,8 @@ export default function Home({ onNavigate }) {
               saving the <code>nalpac_sku</code> metafield
             </li>
             <li>
-              <code>read_orders</code> — for the Orders page
+              <code>read_orders</code> — the Orders page. Shopify limits this scope to the last 60
+              days of orders; reading further back needs <code>read_all_orders</code>.
             </li>
           </ul>
         </li>
@@ -60,6 +61,27 @@ export default function Home({ onNavigate }) {
       <p className="note">
         The app exchanges your client ID and secret for a token using Shopify's client credentials
         grant, which requires the app and the store to belong to the same Shopify organization.
+      </p>
+
+      <h2>Orders</h2>
+      <p>
+        The Orders page lists the most recent orders with their customer, fulfillment and payment
+        status, channel, total, and line items. Tick <strong>Unfulfilled only</strong> to narrow it
+        to orders still awaiting fulfillment.
+      </p>
+      <p>
+        Line items whose product carries a <code>nalpac_sku</code> are tagged, and any order with at
+        least one gets a <strong>Create Nalpac order</strong> button. That opens a form pre-filled
+        from the Shopify order — address, contact, and one line per tagged product — ready to submit
+        to Nalpac. You supply the shipping option (carrier) ID.
+      </p>
+
+      <h2>Nalpac pages</h2>
+      <p>
+        Under <strong>Nalpac</strong> the sidebar has <strong>Orders</strong>, listing orders placed
+        with Nalpac, and{' '}
+        <strong>Carriers</strong>, which lists each carrier's ID — that's the shipping option ID the
+        create-order form asks for.
       </p>
 
       <h2>Editing SKUs</h2>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isExpired } from '../token'
+import { useScrollLock } from '../useScrollLock'
 
 function countdown(expiresAt) {
   const ms = expiresAt - Date.now()
@@ -19,6 +20,7 @@ export default function CredentialsModal({
   canRefresh,
   onClose,
 }) {
+  useScrollLock()
   const [revealed, setRevealed] = useState(false)
   const [, tick] = useState(0)
 

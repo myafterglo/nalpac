@@ -9,8 +9,12 @@ npm install
 npm run dev
 ```
 
-A left sidebar holds three pages: **Home** (setup instructions), **Products**
-(the product list and SKU editor), and **Orders** (not implemented yet).
+The left sidebar is grouped: **Home**; under *Shopify*, **Products** (the
+product list and SKU editor) and **Orders**; under *Nalpac*, **Orders**
+(`GET api/order`, with filters
+for ship-to name, PO number, order number, and tracking) and
+**Carriers** (`GET api/carrier` — the IDs the create-order form needs as its
+shipping option ID).
 
 Open **Credentials** in the top bar to enter the Shopify store domain, client
 ID, and client secret, plus your Nalpac API username and password. All of them
@@ -35,6 +39,28 @@ type from the store's metafield definitions rather than assuming them, falling
 back to `custom` / `single_line_text_field` if no definition exists. Writing
 needs the `write_products` scope; reading the values needs `read_products`. The
 Orders page will need `read_orders`.
+
+The Orders page lists the 50 most recent orders, with a **Show 50 more** button
+that walks the `Link`-header cursor until the store runs out — number, date, customer,
+fulfillment and payment status, channel, and total — each with a line-item table
+of image, price, quantity, and line total. REST line items carry no image, so
+each distinct `product_id` is looked up over GraphQL (`featuredImage`) in
+batches of 100 after the orders load; a failure there leaves placeholders rather
+than blanking the list. **Unfulfilled only** adds
+`fulfillment_status=unfulfilled`; an order Shopify reports as `null` is shown as
+unfulfilled. Note the REST endpoint defaults to *oldest* first, so the request
+asks for `order=created_at desc` and the results are re-sorted client-side in
+case that parameter is ignored. `read_orders` only reaches back 60 days —
+further needs `read_all_orders`.
+
+An order containing products that carry a `nalpac_sku` gets a **Create Nalpac
+order** button, which opens a form pre-filled from the Shopify order: date, PO number from the order name, notes,
+shipping address, phone, email, and one line per tagged product with its
+quantity. Each line picks its own warehouse (Detroit 15 / Phoenix 25). A **Submit as** dropdown chooses the
+endpoint: *Test order* posts to `api/TestOrder` (the default, which validates
+without placing anything) and *Real order* posts to `api/order`. The
+shipping option (carrier) ID must be entered by hand — wiring up a carrier
+dropdown needs the GET Carriers endpoint's documentation.
 
 Products are fetched 250 at a time and every page is followed via the cursor in
 Shopify's `Link` header, so the full catalog loads rather than just the first

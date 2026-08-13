@@ -1,6 +1,8 @@
 import { buildProductRows } from '../productRows'
+import { useScrollLock } from '../useScrollLock'
 
 export default function ProductDetail({ product, metafieldValue, onClose }) {
+  useScrollLock()
   const image = product.image || product.images?.[0]
 
   return (
