@@ -7,6 +7,10 @@
   --accent: #008060;
   --accent-hover: #006e52;
   --danger: #8e0b21;
+  /* Nalpac's identity colour, used wherever Nalpac data or actions appear. */
+  --nalpac: #1b3a6b;
+  --nalpac-deep: #102546;
+  --nalpac-hover: #27508f;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -82,6 +86,7 @@ body {
   width: min(440px, 100%);
   max-height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px;
   background: var(--surface);
   border-radius: 10px;
@@ -268,6 +273,26 @@ body {
   border-right: 1px solid var(--border);
 }
 
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-section + .nav-section {
+  margin-top: 14px;
+}
+
+.nav-title {
+  margin: 0 0 4px;
+  padding: 0 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
 .nav-item {
   padding: 8px 12px;
   text-align: left;
@@ -303,6 +328,224 @@ body {
   min-width: 0;
   max-width: 1100px;
   padding: 24px 24px 60px;
+}
+
+.page-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+/* ---- Nalpac orders and carriers ---- */
+.nalpac-orders,
+.carriers {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nalpac-order {
+  padding: 12px 14px;
+  color: #fff;
+  background: var(--nalpac);
+  border-radius: 8px;
+}
+
+.nalpac-order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nalpac-order-head h3 {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+}
+
+.nalpac-order .ghost-btn {
+  color: rgb(255 255 255 / 0.8);
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.nalpac-order .ghost-btn:hover {
+  color: var(--nalpac);
+  background: #fff;
+  border-color: #fff;
+}
+
+.nalpac-order-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px 20px;
+  margin: 10px 0 0;
+}
+
+.nalpac-order-fields dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgb(255 255 255 / 0.6);
+}
+
+.nalpac-order-fields dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.nalpac-order-address {
+  grid-column: span 2;
+}
+
+.nalpac-order-address dd span {
+  display: block;
+  line-height: 1.45;
+}
+
+.nalpac-order-address .address-name {
+  font-weight: 600;
+}
+
+.nalpac-order-address .address-contact {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.carrier {
+  padding: 12px 14px;
+  color: #fff;
+  background: var(--nalpac);
+  border-radius: 8px;
+}
+
+.carrier-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.carrier-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.carrier-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.7);
+}
+
+.options {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 4px 16px;
+}
+
+.options li {
+  display: flex;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 0.08);
+}
+
+/* Selectable variant, used by the carrier picker. */
+.options li:has(.option-btn) {
+  padding: 0;
+}
+
+.option-btn {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 9px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.option-btn:hover:not(:disabled) {
+  background: #fff;
+  color: var(--nalpac);
+}
+
+.option-btn:disabled {
+  color: rgb(255 255 255 / 0.5);
+  cursor: not-allowed;
+}
+
+/* Shipping option field in the order form. */
+.option-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.option-chosen {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.option-unset {
+  color: rgb(255 255 255 / 0.5);
+}
+
+.manual-id {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.manual-id .field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.option-id {
+  flex: 0 0 72px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.option-name {
+  flex: 1;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.options-empty {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.65);
+}
+
+.carrier .ghost-btn {
+  color: rgb(255 255 255 / 0.8);
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.carrier .ghost-btn:hover {
+  color: var(--nalpac);
+  background: #fff;
+  border-color: #fff;
 }
 
 /* ---- prose pages ---- */
@@ -551,19 +794,30 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 /* ---- metafield editor ---- */
+/* Plain until a nalpac_sku is set; then the row takes Nalpac's colour. */
 .metafield {
-  padding: 8px 12px 10px;
+  padding: 9px 12px 11px;
   border-top: 1px solid var(--border);
+  border-radius: 0 0 9px 9px;
+}
+
+.metafield-set {
+  color: #fff;
+  background: var(--nalpac);
+  border-top-color: var(--nalpac);
 }
 
 .metafield-label {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
   color: var(--muted);
+}
+
+.metafield-set .metafield-label {
+  color: rgb(255 255 255 / 0.72);
 }
 
 .metafield-row {
@@ -592,6 +846,25 @@ body {
   cursor: not-allowed;
 }
 
+.metafield-set .metafield-row input {
+  color: #fff;
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.28);
+}
+
+.metafield-set .metafield-row input::placeholder {
+  color: rgb(255 255 255 / 0.45);
+}
+
+.metafield-set .metafield-row input:focus {
+  outline-color: #fff;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.metafield-set .metafield-row input:disabled {
+  color: rgb(255 255 255 / 0.5);
+}
+
 .loupe-btn {
   display: flex;
   align-items: center;
@@ -606,8 +879,8 @@ body {
 }
 
 .loupe-btn:hover:not(:disabled) {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--nalpac);
+  border-color: var(--nalpac);
 }
 
 .loupe-btn:disabled {
@@ -615,12 +888,27 @@ body {
   cursor: not-allowed;
 }
 
+.metafield-set .loupe-btn {
+  color: #fff;
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.28);
+}
+
+.metafield-set .loupe-btn:hover:not(:disabled) {
+  background: #fff;
+  color: var(--nalpac);
+}
+
+.metafield-set .loupe-btn:disabled {
+  color: rgb(255 255 255 / 0.4);
+}
+
 .apply-btn {
   padding: 6px 12px;
   font-size: 12px;
   font-weight: 600;
   color: #fff;
-  background: var(--accent);
+  background: var(--nalpac);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -628,7 +916,7 @@ body {
 }
 
 .apply-btn:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--nalpac-hover);
 }
 
 .apply-btn:disabled {
@@ -636,12 +924,28 @@ body {
   cursor: not-allowed;
 }
 
+.metafield-set .apply-btn,
+.result-box .apply-btn {
+  color: var(--nalpac);
+  background: #fff;
+}
+
+.metafield-set .apply-btn:hover:not(:disabled),
+.result-box .apply-btn:hover:not(:disabled) {
+  background: #dce6f6;
+}
+
+.metafield-set .apply-btn:disabled {
+  color: rgb(255 255 255 / 0.6);
+  background: rgb(255 255 255 / 0.35);
+}
+
 .remove-btn {
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 600;
   color: var(--danger);
-  background: var(--surface);
+  background: transparent;
   border: 1px solid #f0c2c2;
   border-radius: 5px;
   cursor: pointer;
@@ -660,10 +964,24 @@ body {
   cursor: not-allowed;
 }
 
+.metafield-set .remove-btn {
+  color: #ffd4d4;
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.metafield-set .remove-btn:disabled {
+  color: rgb(255 255 255 / 0.4);
+  border-color: rgb(255 255 255 / 0.2);
+}
+
 .metafield-error {
   margin: 6px 0 0;
   font-size: 11px;
   color: var(--danger);
+}
+
+.metafield-set .metafield-error {
+  color: #ffc9c9;
 }
 
 /* ---- product detail ---- */
@@ -680,6 +998,7 @@ body {
   width: min(480px, 100%);
   height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px;
   background: var(--surface);
 }
@@ -757,6 +1076,7 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 24px 24px;
 }
 
@@ -856,18 +1176,20 @@ body {
 
 /* Fixed height keeps every result box aligned; the field list takes up the
    slack and scrolls on its own. */
+/* Results are Nalpac products, so they carry Nalpac's colour. */
 .result-box {
   display: flex;
   flex-direction: column;
   height: 340px;
   padding: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  color: #fff;
+  background: var(--nalpac);
+  border: 1px solid var(--nalpac);
   border-radius: 8px;
 }
 
 .result-box:hover {
-  border-color: var(--accent);
+  border-color: #fff;
 }
 
 .result-head {
@@ -896,11 +1218,11 @@ body {
   grid-template-columns: 45% 1fr;
   gap: 10px;
   padding: 4px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgb(255 255 255 / 0.15);
 }
 
 .result-fields dt {
-  color: var(--muted);
+  color: rgb(255 255 255 / 0.6);
   overflow-wrap: anywhere;
 }
 
@@ -956,14 +1278,14 @@ body {
   height: 48px;
   object-fit: cover;
   border-radius: 5px;
-  background: var(--bg);
+  background: rgb(255 255 255 / 0.12);
 }
 
 .result-sku {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent);
+  color: #fff;
 }
 
 .result-title {
@@ -979,5 +1301,441 @@ body {
   display: flex;
   gap: 10px;
   font-size: 11px;
+  color: rgb(255 255 255 / 0.7);
+}
+
+.result-box .ghost-btn {
+  color: rgb(255 255 255 / 0.8);
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.result-box .ghost-btn:hover {
+  color: var(--nalpac);
+  background: #fff;
+  border-color: #fff;
+}
+
+/* ---- orders ---- */
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.order {
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.order-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.order-headings {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.order-headings h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.order-date {
+  font-size: 12px;
   color: var(--muted);
+}
+
+.order-total {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.order-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.order-customer {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tag-good {
+  background: #e3f4ea;
+  color: #0b6b3a;
+}
+
+.tag-warn {
+  background: #fff2dc;
+  color: #8a5300;
+}
+
+.tag-muted {
+  background: #ebebeb;
+  color: #5c5f62;
+}
+
+.tag-nalpac {
+  background: var(--nalpac);
+  color: #fff;
+}
+
+.tag-plain {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.nalpac-order-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--nalpac);
+  border: 1px solid var(--nalpac);
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nalpac-order-btn:hover {
+  background: var(--nalpac-hover);
+  border-color: var(--nalpac-hover);
+}
+
+.line-items {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.line-items th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.line-items td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.line-items tr:last-child td {
+  border-bottom: none;
+}
+
+.line-image-col {
+  width: 44px;
+  padding-right: 0 !important;
+}
+
+.line-image {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 5px;
+  background: var(--bg);
+}
+
+.line-image-empty {
+  border: 1px solid var(--border);
+}
+
+.line-items .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.line-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.line-tag {
+  flex: none;
+}
+
+.line-variant,
+.line-sku {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.line-sku {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---- Nalpac order form ---- */
+/* Green for Shopify, so it reads apart from the blue Nalpac form below. */
+.order-summary {
+  margin: 14px 0 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: var(--text);
+  background: #e8f5ee;
+  border: 1px solid #a8dcbf;
+}
+
+.order-summary-label {
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0b6b3a;
+}
+
+.order-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 22px;
+  margin: 0;
+}
+
+.order-summary-address {
+  grid-column: span 2;
+}
+
+.order-summary dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.order-summary dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summary-sub,
+.summary-line {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* The drawer wears Nalpac's colour; the Shopify summary inside stays green. */
+.drawer-form {
+  width: min(720px, 100%);
+  background: var(--nalpac-deep);
+  color: #fff;
+}
+
+.drawer-form .detail-head h2,
+.drawer-form .close-btn {
+  color: #fff;
+}
+
+.drawer-form .drawer-sub {
+  color: rgb(255 255 255 / 0.65);
+}
+
+.drawer-form .modal-section {
+  color: rgb(255 255 255 / 0.72);
+  border-bottom-color: rgb(255 255 255 / 0.18);
+}
+
+.drawer-form .field span {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.drawer-form .field input,
+.drawer-form .field textarea,
+.drawer-form .field select,
+.drawer-form .qty-input,
+.drawer-form .line-items select {
+  color: #fff;
+  background: rgb(255 255 255 / 0.09);
+  border-color: rgb(255 255 255 / 0.24);
+}
+
+.drawer-form .field input::placeholder,
+.drawer-form .field textarea::placeholder {
+  color: rgb(255 255 255 / 0.4);
+}
+
+.drawer-form .field input:focus,
+.drawer-form .field textarea:focus {
+  outline-color: #fff;
+  background: rgb(255 255 255 / 0.15);
+}
+
+/* Native dropdowns and date pickers don't inherit the dark parent. */
+.drawer-form select option {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.drawer-form input[type='date'] {
+  color-scheme: dark;
+}
+
+.drawer-form .checkbox {
+  color: #fff;
+}
+
+.drawer-form .checkbox input {
+  accent-color: #fff;
+}
+
+.drawer-form .line-items th {
+  color: rgb(255 255 255 / 0.6);
+  border-bottom-color: rgb(255 255 255 / 0.18);
+}
+
+.drawer-form .line-items td {
+  border-bottom-color: rgb(255 255 255 / 0.12);
+}
+
+.drawer-form .line-variant,
+.drawer-form .empty {
+  color: rgb(255 255 255 / 0.6);
+}
+
+/* Primary action reads white-on-blue rather than the app's green. */
+.drawer-form .load-btn {
+  color: var(--nalpac-deep);
+  background: #fff;
+}
+
+.drawer-form .load-btn:hover:not(:disabled) {
+  background: #dce6f6;
+}
+
+.drawer-form .load-btn:disabled {
+  color: rgb(255 255 255 / 0.55);
+  background: rgb(255 255 255 / 0.25);
+}
+
+.drawer-form .link-btn {
+  color: #fff;
+}
+
+.drawer-form .ghost-btn {
+  color: rgb(255 255 255 / 0.8);
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+.drawer-form .ghost-btn:hover {
+  color: var(--nalpac-deep);
+  background: #fff;
+  border-color: #fff;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.form-row .field {
+  flex: 1;
+  min-width: 130px;
+}
+
+.field textarea {
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  resize: vertical;
+}
+
+.field textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  background: var(--surface);
+}
+
+.qty-input {
+  width: 66px;
+  padding: 5px 7px;
+  font-size: 13px;
+  text-align: right;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.line-items select {
+  padding: 5px 7px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+}
+
+.form-actions {
+  margin: 18px 0 8px;
+}
+
+.live-warning {
+  margin: 10px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffd08a;
+}
+
+.success {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #e3f4ea;
+  border: 1px solid #a8dcbf;
+  color: #0b6b3a;
+  font-size: 13px;
+  font-weight: 600;
 }

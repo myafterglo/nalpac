@@ -7,6 +7,7 @@ import {
   hasNalpacCredentials,
   searchNalpacProducts,
 } from '../nalpac'
+import { useScrollLock } from '../useScrollLock'
 
 // The full Shopify product, kept in view while searching Nalpac.
 function ShopifyProductPanel({ product, metafieldValue }) {
@@ -34,6 +35,7 @@ export default function NalpacSearchDrawer({
   onSelect,
   onClose,
 }) {
+  useScrollLock()
   const [keyword, setKeyword] = useState(product.title)
   const [excludeDiscontinued, setExcludeDiscontinued] = useState(true)
   const [locationId, setLocationId] = useState(DEFAULT_LOCATION_ID)

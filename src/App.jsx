@@ -5,11 +5,14 @@ import CredentialsModal from './components/CredentialsModal'
 import Home from './pages/Home'
 import Products from './pages/Products'
 import Orders from './pages/Orders'
+import NalpacOrders from './pages/NalpacOrders'
+import Carriers from './pages/Carriers'
 import { loadCredentials, saveCredentials } from './credentials'
 import { loadToken, requestToken, saveToken } from './token'
+import { usePage } from './usePage'
 
 export default function App() {
-  const [page, setPage] = useState('home')
+  const [page, setPage] = usePage()
   const [creds, setCreds] = useState(loadCredentials)
   const [token, setToken] = useState(loadToken)
   const [credentialsOpen, setCredentialsOpen] = useState(false)
@@ -60,7 +63,16 @@ export default function App() {
               hasCredentials={hasCredentials}
             />
           )}
-          {page === 'orders' && <Orders />}
+          {page === 'orders' && (
+            <Orders
+              creds={creds}
+              token={token}
+              newToken={newToken}
+              hasCredentials={hasCredentials}
+            />
+          )}
+          {page === 'nalpac-orders' && <NalpacOrders creds={creds} />}
+          {page === 'carriers' && <Carriers creds={creds} />}
         </main>
       </div>
 

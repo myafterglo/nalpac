@@ -90,7 +90,7 @@ export default function ProductCard({
         </div>
       </button>
 
-      <div className="metafield">
+      <div className={`metafield${metafieldValue ? ' metafield-set' : ''}`}>
         <label className="metafield-label" htmlFor={`sku-${product.id}`}>
           {METAFIELD_KEY}
         </label>
