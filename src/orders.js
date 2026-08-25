@@ -147,6 +147,61 @@ export function addressLines(address) {
   )
 }
 
+// Walk-in sales carry no address; they all happen over the Canadian counter.
+const POS_ADDRESS = { country_code: 'CA' }
+
+/** A till sale: rung up in the shop, so nothing ever ships. */
+export function isCounterSale(order) {
+  return order.source_name === 'pos' && !order.shipping_address
+}
+
+/**
+ * The address a package would ship to, falling back to the billing address.
+ * Null for counter sales, whose billing address describes no shipment.
+ */
+export function shippingAddress(order) {
+  if (isCounterSale(order)) return null
+  return order.shipping_address || order.billing_address || null
+}
+
+/** The address whose country the order's flag shows. */
+export function flagAddress(order) {
+  return shippingAddress(order) || (isCounterSale(order) ? POS_ADDRESS : null)
+}
+
+// Regional indicator symbols sit this far above the ASCII letters.
+const FLAG_OFFSET = 0x1f1e6 - 'A'.charCodeAt(0)
+
+/** The address's ISO 3166-1 alpha-2 code, or '' when it isn't one. */
+export function alpha2(address) {
+  const code = (address?.country_code || '').trim().toUpperCase()
+  return /^[A-Z]{2}$/.test(code) ? code : ''
+}
+
+/** The address's country as a flag emoji, or '' when the code is missing. */
+export function countryFlag(address) {
+  const code = alpha2(address)
+  if (!code) return ''
+  return String.fromCodePoint(...[...code].map((letter) => letter.charCodeAt(0) + FLAG_OFFSET))
+}
+
+/** Orders bound for the United States. */
+export function isUsOrder(order) {
+  return alpha2(flagAddress(order)) === 'US'
+}
+
+/** Readable country name for the flag's tooltip. */
+export function countryName(address) {
+  const code = alpha2(address)
+  if (!code) return address?.country || ''
+  try {
+    return new Intl.DisplayNames(undefined, { type: 'region' }).of(code) || code
+  } catch {
+    // Intl.DisplayNames is missing on older browsers.
+    return address?.country || code
+  }
+}
+
 export function customerName(order) {
   const customer = order.customer
   const named = [customer?.first_name, customer?.last_name].filter(Boolean).join(' ')

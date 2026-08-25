@@ -1,4 +1,4 @@
-import { DEFAULT_LOCATION_ID } from './nalpac'
+import { DEFAULT_LOCATION_ID, DEFAULT_SHIPPING_OPTION } from './nalpac'
 
 function today() {
   const now = new Date()
@@ -27,8 +27,8 @@ export function draftFromShopifyOrder(order, details) {
     },
     ShipToPhoneNumber: address.phone || order.phone || '',
     ShipToEmailAddress: order.email || order.contact_email || '',
-    ShippingOptionId: '',
-    ShippingOptionLabel: '', // display only; stripped by toRequestBody
+    ShippingOptionId: String(DEFAULT_SHIPPING_OPTION.id),
+    ShippingOptionLabel: DEFAULT_SHIPPING_OPTION.label, // display only; stripped by toRequestBody
     DeliveryInstructions: '',
     SignatureRequired: false,
     lines: nalpacLines(order, details),
