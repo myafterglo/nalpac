@@ -18,7 +18,7 @@ function ShopifyProductPanel({ product, metafieldValue }) {
       {image && <img className="shopify-ref-image" src={image.src} alt="" loading="lazy" />}
       <dl className="kv kv-grid">
         {buildProductRows(product, metafieldValue).map(([key, value]) => (
-          <div className="kv-row" key={key}>
+          <div className={`kv-row${key === 'Description' ? ' kv-row-wide' : ''}`} key={key}>
             <dt>{key}</dt>
             <dd>{String(value)}</dd>
           </div>
@@ -127,8 +127,12 @@ export default function NalpacSearchDrawer({
 
           {error && <p className="error">{error}</p>}
 
-          {results === null && !error && <p className="empty">Enter a keyword and search.</p>}
-          {results?.length === 0 && <p className="empty">No matching Nalpac products.</p>}
+          {results === null && !error && !searching && (
+            <p className="empty">Enter a keyword and search.</p>
+          )}
+          {results?.length === 0 && !searching && (
+            <p className="empty">No matching Nalpac products.</p>
+          )}
 
           {results?.length > 0 && (
             <p className="count">
@@ -137,13 +141,24 @@ export default function NalpacSearchDrawer({
           )}
         </div>
 
-        {results?.length > 0 && (
+        {(results?.length > 0 || searching) && (
           <div className="drawer-results">
-            <ul className="results">
-              {results.map((item, index) => (
-                <NalpacResultCard key={item.sku || index} item={item} onSelect={onSelect} />
-              ))}
-            </ul>
+            <div className={`results-wrap${searching ? ' is-loading' : ''}`}>
+              {results?.length > 0 && (
+                <ul className="results">
+                  {results.map((item, index) => (
+                    <NalpacResultCard key={item.sku || index} item={item} onSelect={onSelect} />
+                  ))}
+                </ul>
+              )}
+
+              {searching && (
+                <div className="loading-overlay">
+                  <span className="spinner" />
+                  <span>Searching Nalpac…</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </aside>

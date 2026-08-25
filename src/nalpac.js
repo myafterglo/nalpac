@@ -94,12 +94,9 @@ function authHeaders(creds) {
   return { 'x-nalpac-auth': basicAuth(creds.nalpacUser.trim(), creds.nalpacPassword) }
 }
 
-/**
- * Submits an order. `test` posts to api/TestOrder, which validates the request
- * without placing a real order; the real endpoint is api/order.
- */
-export async function createNalpacOrder(creds, payload, { test = true } = {}) {
-  const res = await fetch(test ? '/api/nalpac/TestOrder' : '/api/nalpac/order', {
+/** Places an order with Nalpac. Returns whatever it echoes back. */
+export async function createNalpacOrder(creds, payload) {
+  const res = await fetch('/api/nalpac/order', {
     method: 'POST',
     headers: { ...authHeaders(creds), 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -250,13 +247,12 @@ export async function fetchNalpacOrders(creds, { pageNumber = 1, filters = {} } 
 }
 
 /**
- * Whether another page is worth requesting. Uses the reported total when there
- * is one, otherwise infers the end from a short page.
+ * Whether another page is worth requesting. Only an empty page ends the walk —
+ * a short one doesn't, because the page size isn't reliably known and a final
+ * page of 49 would otherwise be mistaken for the end.
  */
-export function hasMorePages({ received, accumulated, total, pageSize }) {
-  if (received === 0) return false
-  if (typeof total === 'number') return accumulated < total
-  return pageSize > 0 && received >= pageSize
+export function hasMorePages({ received }) {
+  return received > 0
 }
 
 /** Shipping carriers and their IDs, used as ShippingOptionId when ordering. */
@@ -289,4 +285,20 @@ export async function searchNalpacProducts(creds, { keyword, excludeDiscontinued
 
   const list = extractList(body)
   return { items: list.map(normalize), total: extractTotal(body) ?? list.length, pageSize: PAGE_SIZE }
+}
+
+/**
+ * Looks one SKU up in the catalog. There is no get-by-SKU endpoint, so this
+ * searches on the SKU and keeps only an exact match — a near match would show
+ * another product's stock, which is worse than showing none. Stock is
+ * per-warehouse, so the location matters.
+ */
+export async function lookupNalpacSku(creds, sku, locationId) {
+  const { items } = await searchNalpacProducts(creds, {
+    keyword: sku,
+    excludeDiscontinued: false,
+    locationId,
+  })
+  const wanted = String(sku).trim().toLowerCase()
+  return items.find((item) => item.sku.trim().toLowerCase() === wanted) || null
 }

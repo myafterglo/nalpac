@@ -35,6 +35,7 @@ export function buildProductRows(product, metafieldValue) {
     ['Published', date(product.published_at)],
     ['Created', date(product.created_at)],
     ['Updated', date(product.updated_at)],
-    ['Description', plainText(product.body_html, 2000) || '—'],
+    // Last, and shown in full — the panel scrolls rather than trimming it.
+    ['Description', plainText(product.body_html, Infinity) || '—'],
   ]
 }

@@ -56,10 +56,8 @@ further needs `read_all_orders`.
 An order containing products that carry a `nalpac_sku` gets a **Create Nalpac
 order** button, which opens a form pre-filled from the Shopify order: date, PO number from the order name, notes,
 shipping address, phone, email, and one line per tagged product with its
-quantity. Each line picks its own warehouse (Detroit 15 / Phoenix 25). A **Submit as** dropdown chooses the
-endpoint: *Test order* posts to `api/TestOrder` (the default, which validates
-without placing anything) and *Real order* posts to `api/order`. The
-shipping option (carrier) ID must be entered by hand — wiring up a carrier
+quantity. Each line picks its own warehouse (Detroit 15 / Phoenix 25). Submitting posts to `api/order`, which places a real
+order. The shipping option is chosen from the carrier list — wiring up a carrier
 dropdown needs the GET Carriers endpoint's documentation.
 
 Products are fetched 250 at a time and every page is followed via the cursor in
@@ -93,18 +91,42 @@ organization** as the app. Public and custom distribution apps have to use token
 exchange or the authorization code grant instead. Grant the app `read_products`.
 
 All three fields are saved to `localStorage` under `shopify-credentials` as you
-type, so they survive a reload. The store domain defaults to
-`afterglosted.myshopify.com` when nothing is stored yet. Note that a token in
-`localStorage` is readable by any script running on the page — clear the key to
-remove it.
+type, so they survive a reload. The store domain defaults to the bare
+`.myshopify.com` suffix when nothing is stored yet, so you only type the store
+name in front of it. Note that a token in `localStorage` is readable by any
+script running on the page — clear the key to remove it.
 
 ## Why there's a proxy
 
-The Admin API returns no CORS headers, so a browser can't call it directly.
-`vite.config.js` registers a small dev-server middleware at `/api/shopify/*`
-that forwards each request to `https://<store>/admin/api/2025-01/*` with the
-token attached, exchanging the client credentials for an access token first.
+Neither the Shopify Admin API nor Nalpac's API returns CORS headers, so the
+browser can't call either one directly — and Shopify's OAuth token endpoint
+won't answer a cross-origin request either. Every call therefore goes through a
+relay on our own origin:
 
-Note this is a **dev-server** middleware: `npm run build` + `npm run preview`
-serves the static bundle without it, so product loading only works under
-`npm run dev`. For a deployed version, move the relay into a real backend.
+| Route | Forwards to |
+| --- | --- |
+| `/api/shopify-token` | `https://<store>/admin/oauth/access_token` |
+| `/api/shopify/*` | `https://<store>/admin/api/2025-01/*` |
+| `/api/nalpac/*` | `https://api2.nalpac.com/api/*` |
+
+The three handlers live in `api/` as Vercel serverless functions. `vite.config.js`
+mounts those same handlers onto the dev server, so there is one implementation
+rather than a dev copy and a production copy.
+
+`npm run preview` serves the built bundle without them, so use `npm run dev`
+locally — under preview the `/api/*` routes 404.
+
+## Deploying
+
+`vercel.json` rewrites every non-`/api` path to `index.html`, which the
+path-based routing in `src/usePage.js` needs so a refresh on `/orders` doesn't
+404. The Vite preset picks up `dist/` on its own; no build settings to set.
+
+Two things to know about the deployed relay:
+
+- It has **no auth of its own**. Credentials arrive in request headers from the
+  browser, so anyone who finds the URL can use it as a proxy to a store of their
+  choosing. Keep the deployment private, or move the secrets into environment
+  variables server-side and add a check.
+- The client secret is kept in `localStorage` and sent on every token request.
+  That is fine for a local tool and worth revisiting for anything shared.

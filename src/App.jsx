@@ -27,7 +27,13 @@ export default function App() {
     saveToken(token)
   }, [token])
 
-  const hasCredentials = !!(creds.shop.trim() && creds.clientId.trim() && creds.secret.trim())
+  // The domain defaults to a bare '.myshopify.com', so require a store name in
+  // front of it rather than just a non-empty field.
+  const hasCredentials = !!(
+    creds.shop.trim().replace(/\.myshopify\.com$/, '') &&
+    creds.clientId.trim() &&
+    creds.secret.trim()
+  )
 
   // Throws on failure so callers (the Products page) can surface the reason.
   async function newToken() {

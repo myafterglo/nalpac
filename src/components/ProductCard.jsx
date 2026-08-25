@@ -15,7 +15,6 @@ function LoupeIcon() {
 export default function ProductCard({
   product,
   creds,
-  onSelect,
   metafieldValue,
   onApply,
   onRemove,
@@ -67,7 +66,7 @@ export default function ProductCard({
 
   return (
     <div className="card">
-      <button className="card-main" onClick={() => onSelect(product)}>
+      <button className="card-main" onClick={() => setSearchOpen(true)}>
         <div className="card-media">
           <div className="card-thumb">
             {image ? (

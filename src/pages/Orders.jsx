@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import OrderCard from '../components/OrderCard'
-import { ORDER_PAGE_SIZE, fetchLineItemDetails, fetchOrders } from '../orders'
+import { ORDER_PAGE_SIZE, fetchLineItemDetails, fetchOrders, oldestCreatedAt } from '../orders'
 import { findDefinition } from '../metafields'
 import { isExpired, matchesCredentials } from '../token'
 
@@ -8,6 +8,7 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
   const [unfulfilledOnly, setUnfulfilledOnly] = useState(false)
   const [orders, setOrders] = useState(null) // null = nothing loaded yet
   const [pageInfo, setPageInfo] = useState(null) // cursor for the next page
+  const [more, setMore] = useState(false) // false only once a page comes back empty
   const [details, setDetails] = useState({})
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -47,12 +48,14 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
 
       setOrders(page.orders)
       setPageInfo(page.pageInfo)
+      setMore(page.orders.length > 0)
       setDetails({})
       await mergeDetails(page.orders, active)
     } catch (err) {
       setError(err.message)
       setOrders(null)
       setPageInfo(null)
+      setMore(false)
     } finally {
       setLoading(false)
     }
@@ -63,10 +66,26 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
     setError(null)
     try {
       const active = await activeToken()
-      const page = await fetchOrders(creds, active, { unfulfilledOnly, pageInfo })
-      setOrders((current) => [...(current || []), ...page.orders])
+      const current = orders || []
+
+      // Prefer Shopify's cursor; when it stops sending one, keep walking back
+      // by date instead of assuming the end.
+      const page = pageInfo
+        ? await fetchOrders(creds, active, { unfulfilledOnly, pageInfo })
+        : await fetchOrders(creds, active, {
+            unfulfilledOnly,
+            createdBefore: oldestCreatedAt(current),
+          })
+
+      // created_at_max is inclusive and a cursor can overlap, so drop anything
+      // already on screen. No new orders means we really have reached the end.
+      const seen = new Set(current.map((order) => order.id))
+      const fresh = page.orders.filter((order) => !seen.has(order.id))
+
+      setOrders([...current, ...fresh])
       setPageInfo(page.pageInfo)
-      await mergeDetails(page.orders, active)
+      setMore(fresh.length > 0)
+      await mergeDetails(fresh, active)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -117,12 +136,12 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
           </div>
 
           <div className="more">
-            {pageInfo ? (
+            {more ? (
               <button className="load-btn" onClick={loadMore} disabled={loadingMore}>
                 {loadingMore ? 'Loading…' : `Show ${ORDER_PAGE_SIZE} more`}
               </button>
             ) : (
-              <p className="empty">That's every order.</p>
+              <p className="empty">No more orders.</p>
             )}
           </div>
         </>

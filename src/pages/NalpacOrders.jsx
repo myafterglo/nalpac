@@ -78,7 +78,6 @@ export default function NalpacOrders({ creds }) {
   const [orders, setOrders] = useState(null) // null = nothing loaded yet
   const [total, setTotal] = useState(null)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(0)
   const [more, setMore] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -93,14 +92,10 @@ export default function NalpacOrders({ creds }) {
     setError(null)
     try {
       const result = await fetchNalpacOrders(creds, { pageNumber: 1, filters })
-      const received = result.orders.length
       setOrders(result.orders)
       setTotal(result.total)
       setPage(1)
-      setPageSize(received)
-      setMore(
-        hasMorePages({ received, accumulated: received, total: result.total, pageSize: received }),
-      )
+      setMore(hasMorePages({ received: result.orders.length }))
     } catch (err) {
       setError(err.message)
       setOrders(null)
@@ -115,16 +110,8 @@ export default function NalpacOrders({ creds }) {
     try {
       const next = page + 1
       const result = await fetchNalpacOrders(creds, { pageNumber: next, filters })
-      const combined = [...(orders || []), ...result.orders]
-      setOrders(combined)
-      setMore(
-        hasMorePages({
-          received: result.orders.length,
-          accumulated: combined.length,
-          total: result.total ?? total,
-          pageSize,
-        }),
-      )
+      setOrders([...(orders || []), ...result.orders])
+      setMore(hasMorePages({ received: result.orders.length }))
       setPage(next)
     } catch (err) {
       setError(err.message)
@@ -182,13 +169,15 @@ export default function NalpacOrders({ creds }) {
             ))}
           </ul>
 
-          {more && (
-            <div className="more">
+          <div className="more">
+            {more ? (
               <button className="load-btn" onClick={loadMore} disabled={loadingMore}>
                 {loadingMore ? 'Loading…' : 'Show next page'}
               </button>
-            </div>
-          )}
+            ) : (
+              <p className="empty">No more orders.</p>
+            )}
+          </div>
         </>
       )}
     </>
