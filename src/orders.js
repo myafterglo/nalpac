@@ -53,7 +53,11 @@ export const ORDER_PAGE_SIZE = PAGE_SIZE
  * the end). The REST endpoint defaults to id ascending — oldest first — so the
  * sort has to be asked for explicitly.
  */
-export async function fetchOrders(creds, token, { unfulfilledOnly = false, pageInfo = null } = {}) {
+export async function fetchOrders(
+  creds,
+  token,
+  { unfulfilledOnly = false, pageInfo = null, createdBefore = null } = {},
+) {
   const params = new URLSearchParams({ limit: String(PAGE_SIZE) })
   if (pageInfo) {
     // Shopify rejects page_info alongside anything but limit and fields; the
@@ -63,6 +67,10 @@ export async function fetchOrders(creds, token, { unfulfilledOnly = false, pageI
     params.set('status', 'any')
     params.set('order', 'created_at desc')
     if (unfulfilledOnly) params.set('fulfillment_status', 'unfulfilled')
+    // Fallback when Shopify stops sending a next cursor: ask for everything
+    // older than what we already have. Inclusive, so nothing is skipped at the
+    // boundary — the caller drops the duplicate.
+    if (createdBefore) params.set('created_at_max', createdBefore)
   }
 
   const { data, link } = await adminFetch(`/orders.json?${params}`, creds, token)
@@ -72,6 +80,14 @@ export async function fetchOrders(creds, token, { unfulfilledOnly = false, pageI
     (a, b) => new Date(b.created_at) - new Date(a.created_at),
   )
   return { orders, pageInfo: nextPageInfo(link) }
+}
+
+/** The created_at of the oldest order loaded so far. */
+export function oldestCreatedAt(orders) {
+  return orders.reduce(
+    (oldest, order) => (!oldest || new Date(order.created_at) < new Date(oldest) ? order.created_at : oldest),
+    null,
+  )
 }
 
 /**

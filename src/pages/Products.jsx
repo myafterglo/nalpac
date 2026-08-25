@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import ProductCard from '../components/ProductCard'
-import ProductDetail from '../components/ProductDetail'
 import { fetchProducts } from '../shopify'
 import {
   METAFIELD_KEY,
@@ -18,7 +17,6 @@ export default function Products({ creds, token, newToken, hasCredentials }) {
   const [metafields, setMetafields] = useState({})
   const [definition, setDefinition] = useState(null)
   const [metafieldWarning, setMetafieldWarning] = useState(null)
-  const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -131,7 +129,6 @@ export default function Products({ creds, token, newToken, hasCredentials }) {
                 key={product.id}
                 product={product}
                 creds={creds}
-                onSelect={setSelected}
                 metafieldValue={metafields[product.id]}
                 onApply={applyMetafield}
                 onRemove={removeMetafield}
@@ -142,13 +139,6 @@ export default function Products({ creds, token, newToken, hasCredentials }) {
         </>
       )}
 
-      {selected && (
-        <ProductDetail
-          product={selected}
-          metafieldValue={metafields[selected.id]}
-          onClose={() => setSelected(null)}
-        />
-      )}
     </>
   )
 }

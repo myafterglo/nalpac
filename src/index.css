@@ -492,11 +492,33 @@ body {
   align-items: center;
   gap: 10px;
   min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
 }
 
 .option-chosen {
   font-size: 13px;
   overflow-wrap: anywhere;
+}
+
+/* Unchosen reads as an unfilled required field rather than a quiet default. */
+.field-required .option-picker {
+  background: rgb(255 90 90 / 0.12);
+  border-color: #ff8a8a;
+}
+
+.drawer-form .field-required span {
+  color: #ff9c9c;
+}
+
+.field-required .option-unset {
+  color: #ff9c9c;
+  font-weight: 600;
+}
+
+.field-required .link-btn {
+  color: #ff9c9c;
 }
 
 .option-unset {
@@ -1124,12 +1146,23 @@ body {
   font-size: 12px;
 }
 
-/* Keep a long description from stretching its whole column. */
+/* Values are clipped to a few lines so the grid stays even… */
 .kv-grid .kv-row dd {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* …except the description, which spans the grid and is shown in full. */
+.kv-grid .kv-row-wide {
+  grid-column: 1 / -1;
+}
+
+.kv-grid .kv-row-wide dd {
+  display: block;
+  -webkit-line-clamp: none;
+  overflow: visible;
 }
 
 .search-form {
@@ -1163,6 +1196,55 @@ body {
 
 .search-form-wide .checkbox {
   padding-bottom: 9px;
+}
+
+/* Previous results stay visible but recede while a new search runs. */
+.results-wrap {
+  position: relative;
+}
+
+.results-wrap.is-loading {
+  min-height: 180px;
+}
+
+.results-wrap.is-loading .results {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding-top: 56px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nalpac);
+}
+
+.spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgb(27 58 107 / 0.2);
+  border-top-color: var(--nalpac);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
 }
 
 .results {
@@ -1500,6 +1582,55 @@ body {
 
 .line-tag {
   flex: none;
+}
+
+/* The catalog summary sits in its own panel under the SKU. */
+.line-stock {
+  display: block;
+  margin-top: 6px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.15);
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.6);
+}
+
+.line-stock span {
+  display: block;
+}
+
+.stock-brand {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.stock-raw-btn {
+  margin-top: 7px;
+  padding: 3px 8px;
+  font-size: 10px;
+}
+
+.stock-title {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.stock-ok {
+  color: #9ae6b4;
+  font-weight: 600;
+}
+
+.stock-bad {
+  color: #ff9c9c;
+  font-weight: 600;
+}
+
+.stock-price {
+  color: rgb(255 255 255 / 0.6);
 }
 
 .line-variant,

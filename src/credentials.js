@@ -2,7 +2,7 @@ const STORAGE_KEY = 'shopify-credentials'
 
 export const DEFAULT_CREDENTIALS = {
   // Shopify
-  shop: 'afterglosted.myshopify.com',
+  shop: '.myshopify.com',
   clientId: '',
   secret: '',
   // Nalpac
