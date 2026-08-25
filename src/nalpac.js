@@ -5,6 +5,10 @@ export const LOCATIONS = [
 
 export const DEFAULT_LOCATION_ID = 15
 
+// Preselected on a new order — the usual choice, and still changeable in the
+// carrier picker. Carrier 133481 in Nalpac's "Special" group.
+export const DEFAULT_SHIPPING_OPTION = { id: 133481, label: 'Best Rate Standard' }
+
 // sortBy takes a bare field name. Direction syntax isn't documented and
 // several forms were tried without effect ("OrderDate:2", "-OrderDate",
 // "OrderDate:desc", "desc(OrderNumber)"), so the field is sent on its own and

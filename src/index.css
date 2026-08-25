@@ -1419,6 +1419,30 @@ body {
   border-radius: 10px;
 }
 
+/* Collapsed to its header line, an order still shows number, date, price and flag. */
+.order-collapsed {
+  padding: 7px 16px;
+  background: var(--bg);
+}
+
+.order-collapsed .order-headings h3,
+.order-collapsed .order-total {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* US orders wear a faint blue wash — enough to pick them out of the list. */
+.order-us {
+  background: linear-gradient(#eaf1fd 0%, #f6f9ff 42%, var(--surface) 100%);
+  border-color: #d3e0f6;
+}
+
+.order-us .order-address {
+  background: rgb(255 255 255 / 0.66);
+  border-color: #d9e4f7;
+}
+
 .order-head {
   display: flex;
   align-items: baseline;
@@ -1445,9 +1469,19 @@ body {
 }
 
 .order-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+/* Flag emoji render taller than the digits beside them; nudge them down a hair. */
+.order-flag {
+  font-size: 16px;
+  line-height: 1;
+  cursor: default;
 }
 
 .order-tags {
@@ -1456,11 +1490,6 @@ body {
   align-items: center;
   gap: 8px;
   margin-top: 8px;
-}
-
-.order-customer {
-  margin: 6px 0 0;
-  font-size: 13px;
 }
 
 .tag {
@@ -1521,6 +1550,60 @@ body {
 .nalpac-order-btn:hover {
   background: var(--nalpac-hover);
   border-color: var(--nalpac-hover);
+}
+
+/* Items take the room they need; the address parks in a fixed rail on the right. */
+.order-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.order-body .line-items {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.order-address {
+  flex: 0 0 200px;
+  padding: 9px 11px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.order-address h4 {
+  margin: 0 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.order-address span {
+  display: block;
+}
+
+.order-address .address-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+@media (max-width: 800px) {
+  .order-body {
+    flex-direction: column;
+  }
+
+  .order-address {
+    flex: none;
+    width: 100%;
+  }
 }
 
 .line-items {

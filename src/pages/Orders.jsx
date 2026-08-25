@@ -1,11 +1,19 @@
 import { useState } from 'react'
 import OrderCard from '../components/OrderCard'
-import { ORDER_PAGE_SIZE, fetchLineItemDetails, fetchOrders, oldestCreatedAt } from '../orders'
+import {
+  ORDER_PAGE_SIZE,
+  fetchLineItemDetails,
+  fetchOrders,
+  isUsOrder,
+  oldestCreatedAt,
+} from '../orders'
 import { findDefinition } from '../metafields'
 import { isExpired, matchesCredentials } from '../token'
 
 export default function Orders({ creds, token, newToken, hasCredentials }) {
   const [unfulfilledOnly, setUnfulfilledOnly] = useState(false)
+  // A view toggle, not a filter: non-US orders stay in the list, collapsed to a line.
+  const [usOnly, setUsOnly] = useState(true)
   const [orders, setOrders] = useState(null) // null = nothing loaded yet
   const [pageInfo, setPageInfo] = useState(null) // cursor for the next page
   const [more, setMore] = useState(false) // false only once a page comes back empty
@@ -108,6 +116,11 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
           />
           <span>Unfulfilled only</span>
         </label>
+
+        <label className="checkbox">
+          <input type="checkbox" checked={usOnly} onChange={(e) => setUsOnly(e.target.checked)} />
+          <span>Show only US orders</span>
+        </label>
       </div>
 
       {error && <p className="error">{error}</p>}
@@ -131,7 +144,13 @@ export default function Orders({ creds, token, newToken, hasCredentials }) {
           </p>
           <div className="orders">
             {orders.map((order) => (
-              <OrderCard key={order.id} order={order} creds={creds} details={details} />
+              <OrderCard
+                key={order.id}
+                order={order}
+                creds={creds}
+                details={details}
+                collapsed={usOnly && !isUsOrder(order)}
+              />
             ))}
           </div>
 
