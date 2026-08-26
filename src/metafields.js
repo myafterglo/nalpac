@@ -3,6 +3,35 @@ import { BATCH_SIZE, graphql, productGid as gid } from './graphql'
 // The product metafield surfaced and edited on each card.
 export const METAFIELD_KEY = 'nalpac_sku'
 
+/**
+ * The metafield carries one SKU per variant, in variant order, comma
+ * separated — "123,456". Spaces around the commas are tolerated on the way in.
+ */
+export function parseSkuList(value) {
+  return String(value ?? '')
+    .split(',')
+    .map((part) => part.trim())
+}
+
+/** The SKU covering one variant. A lone SKU stands for every variant. */
+export function skuAt(value, index) {
+  const list = parseSkuList(value)
+  if (list.length === 1) return list[0]
+  return list[index] || ''
+}
+
+/** The value with `sku` put at `index`, leaving the other variants alone. */
+export function withSkuAt(value, index, sku, variantCount = 1) {
+  const list = parseSkuList(value)
+  const next = Array.from({ length: Math.max(list.length, variantCount, index + 1) }, (_, i) =>
+    list[i] || '',
+  )
+  next[index] = sku.trim()
+  // A blank between SKUs holds its variant's place; trailing ones say nothing.
+  while (next.length && !next[next.length - 1]) next.pop()
+  return next.join(',')
+}
+
 // Used when the store has no definition for the key — the metafield still gets
 // created, it just isn't backed by a definition.
 const FALLBACK_DEFINITION = { namespace: 'custom', key: METAFIELD_KEY, type: 'single_line_text_field' }

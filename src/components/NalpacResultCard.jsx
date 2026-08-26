@@ -16,21 +16,26 @@ function extraFields(item) {
   return [...entries.filter(isManufacturer), ...entries.filter((e) => !isManufacturer(e))]
 }
 
-export default function NalpacResultCard({ item, onSelect }) {
+export default function NalpacResultCard({ item, variants, assignedTo, onSelect }) {
   const [showRaw, setShowRaw] = useState(false)
+  const selected = assignedTo.length > 0
 
   return (
-    <li className="result-box">
+    <li className={`result-box${selected ? ' result-box-selected' : ''}`}>
       <div className="result-head">
         {item.image && <img className="result-thumb" src={item.image} alt="" loading="lazy" />}
         <div className="result-headings">
           <span className="result-sku">{item.sku || 'No SKU field found'}</span>
+          {selected && <span className="result-selected">✓ Selected</span>}
           <span className="result-title">{item.title || '—'}</span>
           <span className="result-meta">
             {item.price && <span>${item.price}</span>}
             {item.quantity !== undefined && <span>{item.quantity} in stock</span>}
           </span>
         </div>
+        <button className="ghost-btn result-json-btn" onClick={() => setShowRaw(true)}>
+          Raw JSON
+        </button>
       </div>
 
       <dl className="result-fields">
@@ -43,12 +48,33 @@ export default function NalpacResultCard({ item, onSelect }) {
       </dl>
 
       <div className="result-actions">
-        <button className="apply-btn" onClick={() => onSelect(item.sku)} disabled={!item.sku}>
-          Select product
-        </button>
-        <button className="ghost-btn" onClick={() => setShowRaw(true)}>
-          Raw JSON
-        </button>
+        {variants.length ? (
+          <>
+            <span className="result-actions-label">Use for</span>
+            {variants.map(({ index, title }) => {
+              const taken = assignedTo.includes(index)
+              return (
+                <button
+                  key={index}
+                  className={`apply-btn${taken ? ' apply-btn-done' : ''}`}
+                  onClick={() => onSelect(item.sku, index)}
+                  disabled={!item.sku || taken}
+                  title={taken ? `${title} already uses this SKU` : `Use this SKU for ${title}`}
+                >
+                  {taken ? `✓ ${title}` : title}
+                </button>
+              )
+            })}
+          </>
+        ) : (
+          <button
+            className={`apply-btn${selected ? ' apply-btn-done' : ''}`}
+            onClick={() => onSelect(item.sku, 0)}
+            disabled={!item.sku || selected}
+          >
+            {selected ? '✓ Selected' : 'Select product'}
+          </button>
+        )}
       </div>
 
       {showRaw && (

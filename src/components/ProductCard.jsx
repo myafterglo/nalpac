@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react'
-import { plainText, priceRange } from '../shopify'
-import { METAFIELD_KEY } from '../metafields'
+import { useEffect, useRef, useState } from 'react'
+import { plainText, priceRange, variantImage } from '../shopify'
+import { METAFIELD_KEY, withSkuAt } from '../metafields'
 import NalpacSearchDrawer from './NalpacSearchDrawer'
+
+// Shopify names the lone variant of an option-less product "Default Title".
+function variantLabel(variant) {
+  const title = variant?.title
+  return !title || title === 'Default Title' ? '' : title
+}
 
 function LoupeIcon() {
   return (
@@ -24,37 +30,68 @@ export default function ProductCard({
   const [saving, setSaving] = useState(false)
   const [removing, setRemoving] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [variantIndex, setVariantIndex] = useState(0)
   const [error, setError] = useState(null)
+  const submitted = useRef(null)
+
+  const variants = product.variants || []
+  const multiVariant = variants.length > 1
+  const variant = multiVariant ? variants[variantIndex] : null
 
   // Adopt the stored value whenever it changes underneath us (reload, or a
   // save that came back normalised by Shopify).
   useEffect(() => {
     setDraft(metafieldValue ?? '')
+    // The store has caught up with the last pick, so stop chaining off it.
+    if (submitted.current === metafieldValue) submitted.current = null
   }, [metafieldValue])
 
-  const image = product.image || product.images?.[0]
+  // With a switcher on, the thumb follows the variant — including to nothing.
+  const image = multiVariant
+    ? variantImage(product, variant)
+    : product.image || product.images?.[0]
+  const label = variantLabel(variant)
   const price = priceRange(product)
   const changed = draft !== (metafieldValue ?? '')
   const isSet = !!metafieldValue
   const busy = saving || removing
 
+  // Wraps around, so either arrow reaches every variant.
+  function step(delta) {
+    setVariantIndex((current) => (current + delta + variants.length) % variants.length)
+  }
+
+  // The field edits the metafield as stored: the whole comma-delimited list.
   // Takes the value explicitly so a Nalpac pick can save without waiting for
   // the draft state to settle.
   async function save(value) {
     setSaving(true)
     setError(null)
+    submitted.current = value
     try {
       await onApply(product, value)
     } catch (err) {
+      submitted.current = null // never stored, so don't build the next pick on it
       setError(err.message)
     } finally {
       setSaving(false)
     }
   }
 
+  // Picking for several variants in a row can outrun Shopify, so each pick
+  // builds on the last value submitted rather than the last one echoed back.
+  function pick(sku, index) {
+    const next = withSkuAt(submitted.current ?? metafieldValue, index, sku, variants.length)
+    setDraft(next)
+    // With variants there are more picks to make, so the drawer stays open.
+    if (!multiVariant) setSearchOpen(false)
+    save(next)
+  }
+
   async function remove() {
     setRemoving(true)
     setError(null)
+    submitted.current = null
     try {
       await onRemove(product)
     } catch (err) {
@@ -65,16 +102,31 @@ export default function ProductCard({
   }
 
   return (
-    <div className="card">
-      <button className="card-main" onClick={() => setSearchOpen(true)}>
+    <div className={`card${multiVariant ? ' card-variants' : ''}`}>
+      {multiVariant && (
+        <div className="variant-nav">
+          <button className="variant-arrow" onClick={() => step(-1)} aria-label="Previous variant">
+            ‹
+          </button>
+          <span className="variant-count">
+            {variantIndex + 1}/{variants.length}
+          </span>
+          <button className="variant-arrow" onClick={() => step(1)} aria-label="Next variant">
+            ›
+          </button>
+        </div>
+      )}
+
+      <div className="card-top">
         <div className="card-media">
-          <div className="card-thumb">
+          <button className="card-thumb" onClick={() => setSearchOpen(true)}>
             {image ? (
               <img src={image.src} alt={image.alt || product.title} loading="lazy" />
             ) : (
               <span className="card-thumb-empty">No image</span>
             )}
-          </div>
+          </button>
+
           <span className={`status status-${product.status}`}>{product.status}</span>
           {price && (
             <span className="card-price">
@@ -83,13 +135,14 @@ export default function ProductCard({
             </span>
           )}
         </div>
-        <div className="card-body">
+        <button className="card-main" onClick={() => setSearchOpen(true)}>
           <h3 className="card-title">{product.title}</h3>
+          {label && <p className="card-variant">{label}</p>}
           <p className="card-desc">{plainText(product.body_html) || 'No description'}</p>
-        </div>
-      </button>
+        </button>
+      </div>
 
-      <div className={`metafield${metafieldValue ? ' metafield-set' : ''}`}>
+      <div className={`metafield${isSet ? ' metafield-set' : ''}`}>
         <label className="metafield-label" htmlFor={`sku-${product.id}`}>
           {METAFIELD_KEY}
         </label>
@@ -130,13 +183,7 @@ export default function ProductCard({
           creds={creds}
           product={product}
           metafieldValue={metafieldValue}
-          onSelect={(sku) => {
-            // Fill the input and save straight away. On failure the draft keeps
-            // the value, so Apply stays available to retry.
-            setDraft(sku)
-            setSearchOpen(false)
-            save(sku)
-          }}
+          onSelect={pick}
           onClose={() => setSearchOpen(false)}
         />
       )}
