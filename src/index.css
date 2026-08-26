@@ -1654,6 +1654,13 @@ body {
   color: var(--muted);
 }
 
+/* Cancelled orders stay in place but fade back: nothing left to act on. */
+/* Outranks the collapsed and US backgrounds set below. */
+.order.order-cancelled {
+  background: transparent;
+  opacity: 0.55;
+}
+
 /* US orders wear a faint blue wash — enough to pick them out of the list. */
 .order-us {
   background: linear-gradient(#eaf1fd 0%, #f6f9ff 42%, var(--surface) 100%);
@@ -1749,12 +1756,24 @@ body {
   border: 1px solid var(--border);
 }
 
+.tag-cancelled {
+  background: #f8dcdc;
+  color: #8a1f1f;
+}
+
 .order-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+
+/* With no Nalpac button beside it, keep Raw JSON on the left of the footer. */
+.order-actions .nalpac-order-btn:only-child {
+  margin-left: auto;
 }
 
 .nalpac-order-btn {
