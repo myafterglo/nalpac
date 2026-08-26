@@ -220,6 +220,11 @@ export function countryFlag(address) {
   return String.fromCodePoint(...[...code].map((letter) => letter.charCodeAt(0) + FLAG_OFFSET))
 }
 
+/** Cancelled orders keep their place in the list, collapsed to a line. */
+export function isCancelled(order) {
+  return Boolean(order.cancelled_at)
+}
+
 /** Orders bound for the United States. */
 export function isUsOrder(order) {
   return alpha2(flagAddress(order)) === 'US'

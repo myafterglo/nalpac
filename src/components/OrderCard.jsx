@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import NalpacOrderDrawer from './NalpacOrderDrawer'
+import RawJsonModal from './RawJsonModal'
 import { METAFIELD_KEY } from '../metafields'
 import { hasNalpacLines, lineSku } from '../nalpacOrder'
 import {
@@ -9,6 +10,7 @@ import {
   countryName,
   flagAddress,
   fulfillmentLabel,
+  isCancelled,
   isCounterSale,
   isUsOrder,
   lineTotal,
@@ -36,6 +38,10 @@ const PAYMENT_TONE = {
 
 export default function OrderCard({ order, creds, details = {}, collapsed = false }) {
   const [orderDrawerOpen, setOrderDrawerOpen] = useState(false)
+  const [showRaw, setShowRaw] = useState(false)
+  // Nothing ships from a cancelled order, so it never needs its details on show.
+  const cancelled = isCancelled(order)
+  const collapse = collapsed || cancelled
   const canOrder = hasNalpacLines(order, details)
   const fulfillment = fulfillmentLabel(order)
   const payment = paymentLabel(order)
@@ -52,7 +58,12 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
 
   return (
     <article
-      className={['order', domestic && 'order-us', collapsed && 'order-collapsed']
+      className={[
+        'order',
+        domestic && 'order-us',
+        collapse && 'order-collapsed',
+        cancelled && 'order-cancelled',
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -60,6 +71,7 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
         <div className="order-headings">
           <h3>{order.name || `#${order.order_number}`}</h3>
           <span className="order-date">{new Date(order.created_at).toLocaleString()}</span>
+          {cancelled && <span className="tag tag-cancelled">cancelled</span>}
         </div>
         <span className="order-total">
           {money(order.total_price, currency)}
@@ -71,7 +83,7 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
         </span>
       </header>
 
-      {collapsed ? null : (
+      {collapse ? null : (
         <>
         <div className="order-tags">
           <span className={`tag tag-${FULFILLMENT_TONE[fulfillment] || 'muted'}`}>
@@ -153,13 +165,16 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
           </aside>
         </div>
 
-        {canOrder && (
-          <div className="order-actions">
+        <div className="order-actions">
+          <button className="ghost-btn" onClick={() => setShowRaw(true)}>
+            Raw JSON
+          </button>
+          {canOrder && (
             <button className="nalpac-order-btn" onClick={() => setOrderDrawerOpen(true)}>
               Create Nalpac order
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {orderDrawerOpen && (
           <NalpacOrderDrawer
@@ -167,6 +182,14 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
             order={order}
             details={details}
             onClose={() => setOrderDrawerOpen(false)}
+          />
+        )}
+
+        {showRaw && (
+          <RawJsonModal
+            title={order.name || `#${order.order_number}`}
+            data={order}
+            onClose={() => setShowRaw(false)}
           />
         )}
         </>
