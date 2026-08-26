@@ -90,9 +90,42 @@ export function oldestCreatedAt(orders) {
   )
 }
 
+// Shopify prices a query at roughly one point per object it could return, over
+// a 1000-point ceiling, so 100 variants a product allows only a handful of
+// products per call — far fewer than the plain BATCH_SIZE used elsewhere.
+const VARIANT_BATCH_SIZE = 5
+const MAX_VARIANTS = 100
+
+/**
+ * Fills in variantIds for the products whose metafield lists a SKU per variant.
+ * Only those need it: a lone SKU covers every variant, so its order is moot.
+ */
+async function addVariantOrder(creds, token, details) {
+  const ids = Object.keys(details).filter((id) => details[id].sku.includes(','))
+
+  for (let i = 0; i < ids.length; i += VARIANT_BATCH_SIZE) {
+    const data = await graphql(
+      creds,
+      token,
+      `query VariantOrder($ids: [ID!]!) {
+         nodes(ids: $ids) {
+           ... on Product { id variants(first: ${MAX_VARIANTS}) { nodes { id } } }
+         }
+       }`,
+      { ids: ids.slice(i, i + VARIANT_BATCH_SIZE).map(productGid) },
+    )
+
+    for (const node of data?.nodes || []) {
+      const detail = node?.id && details[node.id.split('/').pop()]
+      if (!detail) continue
+      detail.variantIds = (node.variants?.nodes || []).map((v) => Number(v.id.split('/').pop()))
+    }
+  }
+}
+
 /**
  * Order line items carry neither an image nor metafields, so look both up per
- * product in one pass. Returns { [productId]: { image, sku } }.
+ * product in one pass. Returns { [productId]: { image, sku, variantIds } }.
  */
 export async function fetchLineItemDetails(creds, token, orders, definition) {
   const ids = [
@@ -129,10 +162,12 @@ export async function fetchLineItemDetails(creds, token, orders, definition) {
           ? { url: node.featuredImage.url, alt: node.featuredImage.altText }
           : null,
         sku: node.metafield?.value || '',
+        variantIds: [],
       }
     }
   }
 
+  await addVariantOrder(creds, token, details)
   return details
 }
 

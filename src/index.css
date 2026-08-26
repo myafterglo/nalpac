@@ -705,6 +705,7 @@ body {
 
 /* ---- card ---- */
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -717,17 +718,22 @@ body {
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
 }
 
-.card-main {
+.card-top {
   display: flex;
   flex: 1;
   gap: 12px;
   padding: 12px;
+}
+
+.card-main {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
   text-align: left;
   font: inherit;
   color: inherit;
   background: none;
   border: none;
-  border-radius: 10px 10px 0 0;
   cursor: pointer;
 }
 
@@ -742,12 +748,15 @@ body {
 .card-thumb {
   width: 64px;
   height: 64px;
+  padding: 0;
+  border: none;
   border-radius: 6px;
   background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .card-thumb img {
@@ -796,8 +805,67 @@ body {
   color: var(--text);
 }
 
-.card-body {
-  min-width: 0;
+/* ---- variant switcher ---- */
+/* Floats over the card's top-right corner; the title is padded to clear it. */
+.variant-nav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+.card-variants .card-title {
+  padding-right: 78px;
+}
+
+.variant-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.variant-arrow:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.variant-count {
+  min-width: 28px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.card-variant {
+  margin: -2px 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-title {
@@ -960,6 +1028,13 @@ body {
 .metafield-set .apply-btn:disabled {
   color: rgb(255 255 255 / 0.6);
   background: rgb(255 255 255 / 0.35);
+}
+
+/* Already assigned to this variant — greyed out so it can't be picked twice. */
+.result-box .apply-btn-done:disabled {
+  color: #fff;
+  background: #9aa2ad;
+  cursor: not-allowed;
 }
 
 .remove-btn {
@@ -1130,6 +1205,17 @@ body {
   background: var(--surface);
 }
 
+.shopify-ref-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.shopify-ref-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
 /* The drawer is wide, so lay the pairs out in columns instead of one long
    list that would push the search form off screen. */
 .kv-grid {
@@ -1163,6 +1249,58 @@ body {
   display: block;
   -webkit-line-clamp: none;
   overflow: visible;
+}
+
+/* ---- variant table (product panel in the search drawer) ---- */
+.variant-table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.variant-table th {
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.variant-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.variant-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-thumb-col {
+  width: 34px;
+}
+
+.variant-thumb {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.variant-thumb-empty {
+  border: 1px dashed var(--border);
+}
+
+.variant-sku {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .search-form {
@@ -1282,9 +1420,16 @@ body {
 
 .result-headings {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+}
+
+/* Top-right of the card, clear of the SKU and title. */
+.result-json-btn {
+  flex: none;
+  align-self: flex-start;
 }
 
 .result-fields {
@@ -1316,8 +1461,29 @@ body {
 .result-actions {
   display: flex;
   flex: none;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  /* One button per variant can be a lot; the card keeps its height. */
+  max-height: 84px;
+  overflow-y: auto;
   padding-top: 12px;
+}
+
+.result-actions-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+/* Variant names run long, so they clip rather than stretch the row. */
+.result-actions .apply-btn {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ghost-btn {
@@ -1396,6 +1562,62 @@ body {
   color: var(--nalpac);
   background: #fff;
   border-color: #fff;
+}
+
+/* ---- a result already carrying this product's nalpac_sku ---- */
+/* Light card, dashed outline: unmistakable against the solid blue ones. */
+.result-box-selected,
+.result-box-selected:hover {
+  color: var(--nalpac-deep);
+  background: #e7eefa;
+  border: 2px dashed var(--nalpac);
+}
+
+.result-selected {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 1px 7px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: var(--nalpac);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-box-selected .result-sku {
+  color: var(--nalpac-deep);
+}
+
+.result-box-selected .result-meta {
+  color: rgb(16 37 70 / 0.7);
+}
+
+.result-box-selected .result-thumb {
+  background: rgb(16 37 70 / 0.1);
+}
+
+.result-box-selected .result-fields div {
+  border-top-color: rgb(16 37 70 / 0.15);
+}
+
+.result-box-selected .result-fields dt {
+  color: rgb(16 37 70 / 0.6);
+}
+
+.result-box-selected .ghost-btn {
+  color: var(--nalpac);
+  background: #fff;
+  border-color: rgb(16 37 70 / 0.25);
+}
+
+.result-box-selected .ghost-btn:hover {
+  color: #fff;
+  background: var(--nalpac);
+  border-color: var(--nalpac);
 }
 
 /* ---- orders ---- */

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import NalpacOrderDrawer from './NalpacOrderDrawer'
 import { METAFIELD_KEY } from '../metafields'
-import { hasNalpacLines } from '../nalpacOrder'
+import { hasNalpacLines, lineSku } from '../nalpacOrder'
 import {
   addressLines,
   channelName,
@@ -97,6 +97,7 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
             <tbody>
               {(order.line_items || []).map((item) => {
                 const detail = details[item.product_id]
+                const sku = lineSku(item, detail)
                 return (
                   <tr key={item.id}>
                     <td className="line-image-col">
@@ -114,10 +115,10 @@ export default function OrderCard({ order, creds, details = {}, collapsed = fals
                     <td>
                       <span className="line-name">
                         {item.title || item.name}
-                        {detail?.sku && (
+                        {sku && (
                           <span
                             className="tag tag-nalpac line-tag"
-                            title={`${METAFIELD_KEY}: ${detail.sku}`}
+                            title={`${METAFIELD_KEY}: ${sku}`}
                           >
                             nalpac
                           </span>

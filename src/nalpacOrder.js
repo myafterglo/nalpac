@@ -1,4 +1,5 @@
 import { DEFAULT_LOCATION_ID, DEFAULT_SHIPPING_OPTION } from './nalpac'
+import { skuAt } from './metafields'
 
 function today() {
   const now = new Date()
@@ -35,22 +36,33 @@ export function draftFromShopifyOrder(order, details) {
   }
 }
 
+/**
+ * The nalpac_sku covering one line item. A product with a SKU per variant lists
+ * them in variant order, so the item's variant picks the slot.
+ */
+export function lineSku(item, detail) {
+  if (!detail?.sku) return ''
+  const index = (detail.variantIds || []).indexOf(item.variant_id)
+  return skuAt(detail.sku, index === -1 ? 0 : index)
+}
+
 /** Only the Shopify line items whose product carries a nalpac_sku. */
 export function nalpacLines(order, details) {
   return (order.line_items || [])
-    .map((item) => ({ item, sku: details[item.product_id]?.sku }))
+    .map((item) => ({ item, sku: lineSku(item, details[item.product_id]) }))
     .filter(({ sku }) => !!sku)
     .map(({ item, sku }) => ({
       key: item.id,
       Sku: sku,
       Quantity: item.quantity || 1,
       ShipLocationId: DEFAULT_LOCATION_ID,
-      title: item.title || item.name,
+      // Two variants of one product make two lines, so name the variant.
+      title: [item.title || item.name, item.variant_title].filter(Boolean).join(' — '),
     }))
 }
 
 export function hasNalpacLines(order, details) {
-  return (order.line_items || []).some((item) => !!details[item.product_id]?.sku)
+  return (order.line_items || []).some((item) => !!lineSku(item, details[item.product_id]))
 }
 
 /** Strips the UI-only fields and coerces the numeric ones the API expects. */

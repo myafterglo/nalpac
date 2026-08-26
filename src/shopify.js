@@ -69,6 +69,12 @@ export function priceRange(product) {
   return { min: Math.min(...prices), max: Math.max(...prices) }
 }
 
+/** A variant's image, found by id among the product's images — often none. */
+export function variantImage(product, variant) {
+  if (!variant?.image_id) return null
+  return (product.images || []).find((img) => img.id === variant.image_id) || null
+}
+
 export function plainText(html, limit = 140) {
   const text = (html || '')
     .replace(/<[^>]*>/g, ' ')
